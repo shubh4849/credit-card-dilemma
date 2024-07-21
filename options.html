@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Payment Options</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .hidden { display: none; }
+        .visible { display: block; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Credit Card Payment Options</h1>
+    <form id="paymentForm">
+        <label for="salary">Monthly Salary:</label>
+        <input type="number" id="salary" name="salary" required><br><br>
+
+        <label for="amount">Payment Amount in question:</label>
+        <input type="number" id="amount" name="amount" required><br><br>
+
+        <label>Option:</label>
+        <input type="radio" id="option1" name="option" value="late" required>
+        <label for="option1">Late Payment</label>
+        <input type="radio" id="option2" name="option" value="emi" required>
+        <label for="option2">Convert to EMI</label><br><br>
+
+        <div id="latePaymentOptions" class="hidden">
+            <label for="lateInterest">Late Payment Interest Rate (monthly, %):</label>
+            <input type="number" id="lateInterest" name="lateInterest"><br><br>
+
+            <label for="delayedDays">Tentative Delayed Days for Late Payment:</label>
+            <input type="number" id="delayedDays" name="delayedDays"><br><br>
+        </div>
+
+        <div id="emiOptions" class="hidden">
+            <label for="emiTenure">Select EMI Tenure:</label>
+            <select id="emiTenure" name="emiTenure">
+                <option value="3">3 months</option>
+                <option value="6">6 months</option>
+                <option value="9">9 months</option>
+                <option value="12">12 months</option>
+                <option value="24">24 months</option>
+            </select><br><br>
+
+            <label for="emiInterest">EMI Interest Rate (%):</label>
+            <input type="number" id="emiInterest" name="emiInterest"><br><br>
+            <p>Processing Fee: ₹199 + 18% GST</p>
+        </div>
+
+        <button type="button" id="calculate">Calculate</button>
+        <p class="error" id="error"></p>
+    </form>
+
+    <h2>Result</h2>
+    <div id="result"></div>
+
+    <script>
+        $(document).ready(function(){
+            $('input[name="option"]').change(function(){
+                $('#latePaymentOptions, #emiOptions').removeClass('visible').addClass('hidden');
+                if ($(this).val() == 'late') {
+                    $('#latePaymentOptions').addClass('visible');
+                } else if ($(this).val() == 'emi') {
+                    $('#emiOptions').addClass('visible');
+                }
+            });
+
+            $('#calculate').click(function(){
+                var salary = parseFloat($('#salary').val());
+                var amount = parseFloat($('#amount').val());
+                var option = $('input[name="option"]:checked').val();
+                var error = '';
+
+                if (isNaN(salary) || salary <= 0) {
+                    error = 'Please enter a valid monthly salary.';
+                } else if (isNaN(amount) || amount <= 0) {
+                    error = 'Please enter a valid remaining payment amount.';
+                } else if (!option) {
+                    error = 'Please select an option.';
+                } else if (option == 'late') {
+                    var lateInterest = parseFloat($('#lateInterest').val());
+                    var delayedDays = parseInt($('#delayedDays').val());
+                    if (isNaN(lateInterest) || lateInterest <= 0) {
+                        error = 'Please enter a valid late payment interest rate.';
+                    } else if (isNaN(delayedDays) || delayedDays <= 0) {
+                        error = 'Please enter valid tentative delayed days.';
+                    } else {
+                        var dailyRate = lateInterest / 30 / 100;
+                        var lateFee = amount * dailyRate * delayedDays;
+                        var totalCost = amount + lateFee;
+                        $('#result').html('Total Cost for Late Payment: ₹' + totalCost.toFixed(2) + ' (including ₹' + lateFee.toFixed(2) + ' interest for ' + delayedDays + ' days)');
+                    }
+                } else if (option == 'emi') {
+                    var emiTenure = parseInt($('#emiTenure').val());
+                    var emiInterest = parseFloat($('#emiInterest').val());
+                    if (isNaN(emiInterest) || emiInterest <= 0) {
+                        error = 'Please enter a valid EMI interest rate.';
+                    } else {
+                        var monthlyRate = emiInterest / 12 / 100;
+                        var processingFee = 199 + (199 * 0.18);
+                        var emi = (amount * monthlyRate * Math.pow(1 + monthlyRate, emiTenure)) / (Math.pow(1 + monthlyRate, emiTenure) - 1);
+                        var totalInterest = (emi * emiTenure) - amount;
+                        var totalCost = amount + processingFee + totalInterest;
+                        $('#result').html('Total EMI Cost: ₹' + totalCost.toFixed(2) + ' (including ₹' + totalInterest.toFixed(2) + ' interest and ₹' + processingFee.toFixed(2) + ' processing fee). Monthly EMI: ₹' + emi.toFixed(2));
+                    }
+                }
+
+                if (error) {
+                    $('#error').text(error);
+                } else {
+                    $('#error').text('');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
