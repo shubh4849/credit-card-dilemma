@@ -60,3 +60,8 @@ Additional Notes
 	•	Use the tool to plan and manage your credit card payments effectively, avoiding unnecessary financial strain.
 
 By following these steps and using the tool, you can make informed decisions about managing your credit card payments and avoid high-interest costs and fees.
+
+
+
+Have a go at it:
+https://shubh4849.github.io/credit-card-dilemma/
